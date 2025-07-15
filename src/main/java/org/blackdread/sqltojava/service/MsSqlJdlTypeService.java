@@ -91,6 +91,7 @@ public class MsSqlJdlTypeService implements SqlJdlTypeService {
                 }
             }
         }
+        log.info("SQL type: {} ({}) converted to JDL type: {}", sqlType, typeName, getTypeMap().get(typeName));
         return Optional.ofNullable(getTypeMap().get(typeName)).orElse(UNSUPPORTED);
     }
 

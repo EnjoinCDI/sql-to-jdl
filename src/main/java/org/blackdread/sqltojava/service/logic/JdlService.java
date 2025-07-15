@@ -179,6 +179,10 @@ public class JdlService {
         if (column.isForeignKey()) {
             // check if table referenced is an enum, otherwise, skip
             final SqlTable tableOfForeignKey = sqlService.getTableOfForeignKey(column);
+            if (tableOfForeignKey == null) {
+                log.debug("Skipped field {} - foreign table is not found", column);
+                return Optional.empty();
+            }
             if (!sqlService.isEnumTable(tableOfForeignKey.getName())) {
                 log.info("Skipped field of ({}) as ({}) is not an enum table", column, tableOfForeignKey);
                 return Optional.empty();
@@ -200,7 +204,8 @@ public class JdlService {
             } else {
                 jdlType = sqlJdlTypeService.sqlTypeToJdlType(column.getType());
                 name = SqlUtils.changeToCamelCase(replaceSlavenChars(toTitleCase(column.getName())));
-                log.info("column name change sql to jdl format: {}, {}", column.getName(), name);
+                log.info("column name change sql to jdl format: {}, {}, type: {} -> {}, table: {}",
+                    column.getName(), name, column.getType(), jdlType.name(), column.getTable().getName());
                 enumEntityName = null;
             }
             if (jdlType == UNSUPPORTED) {
@@ -272,6 +277,10 @@ public class JdlService {
         final SqlTable inverseSideTable,
         final List<JdlRelation> existingRelations
     ) {
+
+        if (inverseSideTable == null) {
+            return Optional.empty();
+        }
         if (!column.isForeignKey()) throw new IllegalArgumentException("Cannot create a relation from a non foreign key");
 
         final SqlTable ownerSideTable = column.getTable();

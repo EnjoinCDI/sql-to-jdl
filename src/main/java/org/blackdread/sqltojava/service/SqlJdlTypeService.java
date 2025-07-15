@@ -8,15 +8,20 @@ import java.util.Map;
 import java.util.Optional;
 import org.blackdread.sqltojava.entity.JdlFieldEnum;
 import org.blackdread.sqltojava.entity.SqlColumn;
+import org.blackdread.sqltojava.service.logic.JdlService;
 import org.blackdread.sqltojava.util.SqlUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public interface SqlJdlTypeService {
     Map<String, JdlFieldEnum> getTypeMap();
+    static final Logger log = LoggerFactory.getLogger(SqlJdlTypeService.class);
 
     default JdlFieldEnum sqlTypeToJdlType(final String sqlType) {
         String typeName = SqlUtils.parseSqlType(sqlType);
         JdlFieldEnum jdlType = Optional.ofNullable(getTypeMap().get(typeName)).orElse(UNSUPPORTED);
         //orElseThrow(() -> new IllegalStateException("Unknown type: " + typeName));
+        log.info("SQL type: {} ({}) converted to JDL type: {}", sqlType, typeName, jdlType);
         return jdlType;
     }
 

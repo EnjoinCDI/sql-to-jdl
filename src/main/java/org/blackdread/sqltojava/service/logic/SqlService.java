@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.blackdread.sqltojava.config.ApplicationProperties;
 import org.blackdread.sqltojava.config.DatabaseObjectTypesConfigEnum;
@@ -113,7 +114,7 @@ public class SqlService {
     }
 
     @Cacheable("SqlService.getTableOfForeignKey")
-    public SqlTable getTableOfForeignKey(final SqlColumn column) {
+    public SqlTable getTableOfForeignKeyOld(final SqlColumn column) {
         log.debug("getTableOfForeignKey called: ({}) ({})", column.getTable().getName(), column.getName());
         return informationSchemaService
             .getAllTableRelationInformation()
@@ -125,6 +126,41 @@ public class SqlService {
             .map(tableName -> buildTables().stream().filter(e -> e.getName().equals(tableName)).findFirst())
             .map(sqlTable -> sqlTable.orElseThrow(() -> new IllegalStateException("Table not found or is ignored")))
             .orElseThrow(() -> new IllegalArgumentException("Column is not a foreign key"));
+    }
+
+    @Cacheable("SqlService.getTableOfForeignKey")
+    public SqlTable getTableOfForeignKey(final SqlColumn column) {
+        log.debug("getTableOfForeignKey called: {}.{}",
+            column.getTable().getName(), column.getName());
+
+        return informationSchemaService
+            .getAllTableRelationInformation()
+            .stream()
+            // find the FK metadata row for this table/column
+            .filter(info -> info.getTableName().equals(column.getTable().getName()))
+            .filter(info -> info.getColumnName().equals(column.getName()))
+            .findFirst()
+            // map to the referenced table name
+            .map(TableRelationInformation::getReferencedTableName)
+            // look up that table in buildTables(); log & return empty if missing
+            .flatMap(tableName -> {
+
+                Optional<SqlTable> found = buildTables()
+                    .stream()
+                    .filter(t -> t.getName().equals(tableName))
+                    .findFirst();
+                if (found.isEmpty()) {
+                    log.warn("Referenced table '{}' not found or ignored for column '{}.{}'",
+                        tableName,
+                        column.getTable().getName(),
+                        column.getName());
+                    List<SqlTable> tables = buildTables();
+                    tables.forEach(t -> log.debug("Table: {}", t));
+                }
+                return found;
+            })
+            // if either there was no FK metadata *or* no matching SqlTable, return null
+            .orElse(null);
     }
 
     /**

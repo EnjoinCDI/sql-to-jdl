@@ -1,9 +1,9 @@
 spring:
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
-        url: jdbc:mysql://localhost:3306/?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
-        username: root
-        password:
+        url: jdbc:sqlserver://enjoin-mi.395f9a2e19c2.database.windows.net:1433;databaseName=EnFORMTEST
+        username: EnjoinDW_RW
+        password: F#4Ke1%gj7F^
         hikari:
             data-source-properties:
                 cachePrepStmts: true
@@ -23,7 +23,7 @@ application:
         - t_
         - v_
     add_table_name_jdl: true
-    undefined_type_handling: ERROR
+    undefined_type_handling: SKIP
     jdl-type-overrides:
         my_type: FLOAT # Example JDL type override
     ignored-table-names:
@@ -47,7 +47,7 @@ application:
         - spt_monitor
         - spt_values
     export:
-        path: ./my-project-jdl.jh
+        path: ./enform.jdl
         type: jdl
         export-file-structure-type: GROUPED_RELATIONS_SEPARATE_VIEWS
         export-mustache-template-filename-optional:
