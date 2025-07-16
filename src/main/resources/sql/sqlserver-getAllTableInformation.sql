@@ -15,7 +15,7 @@ LEFT JOIN
 LEFT JOIN
     sys.extended_properties ep ON ep.major_id = st.object_id AND ep.minor_id = 0 AND ep.name = 'MS_Description'
 WHERE
-    t.TABLE_SCHEMA = 'dbo'
+    t.TABLE_SCHEMA = :schemaName
 --ORDER BY
 --    t.TABLE_SCHEMA,
 --    t.TABLE_TYPE,

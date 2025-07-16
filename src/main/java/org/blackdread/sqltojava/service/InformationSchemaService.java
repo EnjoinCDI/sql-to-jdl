@@ -44,7 +44,7 @@ public class InformationSchemaService {
 
     @Cacheable("InformationSchemaService.getAllTableInformation")
     public List<TableInformation> getAllTableInformation() {
-        log.debug("getAllTableInformation called");
+        log.info("getAllTableInformation called for schema {}", applicationProperties.getDatabaseToExport());
         return informationSchemaRepository.getAllTableInformation(applicationProperties.getDatabaseToExport());
     }
 }
